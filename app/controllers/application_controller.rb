@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::API
+
   def encode_token(payload)
     JWT.encode(payload, 'secret')
   end 
@@ -15,4 +16,13 @@ class ApplicationController < ActionController::API
       end
     end
   end
+
+  def authorized_user
+    decode_token = decode_token()
+    if decode_token
+      user_id = decode_token[0]['user_id']
+      @user = User.find_by(id: user_id)
+    end
+  end
+
 end
