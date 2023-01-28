@@ -1,16 +1,17 @@
 class Api::V1::ArticlesController < ApplicationController
 
   before_action :authorize
-  
+
+  before_action :set_article, only: [:show, :update, :destroy]
+
   def index
-    articles = Article.all
+    articles = @user.articles.all
     render json: articles, status: 200
   end
 
   def show
-    article = Article.find_by(id: params[:id])
-    if article
-      render json: article, status: 200
+    if @article
+      render json: @article, status: 200
     else
       render json: {
         error: "Article not found"
@@ -19,13 +20,10 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   def create
-    article = Article.new(
-      title: article_params[:title],
-      body: article_params[:body],
-    )
+    @article = @user.articles.new(article_params.merge(user: @user))
 
-    if article.save
-      render json: article, status: 200
+    if @article.save
+      render json: @article, status: 200
     else
       render json: {
         error: "Error Creating..."
@@ -34,9 +32,8 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   def update
-    article = Article.find_by(id: params[:id])
-    if article
-      article.update(title: params[:title], body: params[:body])
+    if @article
+      @article.update(article_params)
       render json: "Article record updated successfully"
     else
       render json: {
@@ -46,9 +43,8 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   def destroy
-    article = Article.find_by(id: params[:id])
-    if article
-      article.destroy
+    if @article
+      @article.destroy
       render json: "Article has been deleted"
     else
       render json: {
@@ -58,6 +54,10 @@ class Api::V1::ArticlesController < ApplicationController
   end
 
   private
+
+  def set_article
+    @article = @user.articles.find(params[:id])
+  end
 
   def article_params
     params.require(:article).permit([:title, :body])
