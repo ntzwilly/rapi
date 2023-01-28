@@ -1,4 +1,7 @@
 class Api::V1::ArticlesController < ApplicationController
+
+  before_action :authorize
+  
   def index
     articles = Article.all
     render json: articles, status: 200
@@ -19,7 +22,6 @@ class Api::V1::ArticlesController < ApplicationController
     article = Article.new(
       title: article_params[:title],
       body: article_params[:body],
-      author: article_params[:author]
     )
 
     if article.save
@@ -34,7 +36,7 @@ class Api::V1::ArticlesController < ApplicationController
   def update
     article = Article.find_by(id: params[:id])
     if article
-      article.update(title: params[:title], body: params[:body], author: params[:author])
+      article.update(title: params[:title], body: params[:body])
       render json: "Article record updated successfully"
     else
       render json: {
@@ -58,7 +60,7 @@ class Api::V1::ArticlesController < ApplicationController
   private
 
   def article_params
-    params.require(:article).permit([:title, :body, :author])
+    params.require(:article).permit([:title, :body])
   end
 
 end
